@@ -1,0 +1,83 @@
+version: '3.8'
+
+services:
+  # --- Banco de Dados ---
+  db:
+    image: postgres:15-alpine
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_PASSWORD: password
+    ports:
+      - "5432:5432"
+
+  # --- Redis ---
+  redis:
+    image: redis:alpine
+    ports:
+      - "6379:6379"
+
+  # --- Auth Service ---
+  auth-service:
+    build:
+      context: ../auth-service  # <--- Pulo do Gato: Busca na pasta vizinha
+      dockerfile: Dockerfile
+    command: bash -c "rm -f tmp/pids/server.pid && bundle exec rails s -p 3000 -b '0.0.0.0'"
+    volumes:
+      - ../auth-service:/rails  # Volume mapeado para editar código em tempo real
+    ports:
+      - "3001:3000"
+    environment:
+      DATABASE_URL: postgres://postgres:password@db:5432/auth_service_development
+    depends_on:
+      - db
+
+  # --- Notification Service ---
+  notification-service:
+    build:
+      context: ../notification-service # <--- Busca na pasta vizinha
+      dockerfile: Dockerfile
+    command: bash -c "rm -f tmp/pids/server.pid && bundle exec rails s -p 3000 -b '0.0.0.0'"
+    volumes:
+      - ../notification-service:/rails
+    ports:
+      - "3002:3000"
+    environment:
+      DATABASE_URL: postgres://postgres:password@db:5432/notification_service_development
+    depends_on:
+      - db
+
+  # --- Manager (Web) ---
+  webscraping-manager:
+    build: .  # <--- Contexto é a própria pasta atual
+    command: bash -c "rm -f tmp/pids/server.pid && bundle exec rails s -p 3000 -b '0.0.0.0'"
+    volumes:
+      - .:/rails
+    ports:
+      - "3000:3000"
+    environment:
+      DATABASE_URL: postgres://postgres:password@db:5432/manager_development
+      REDIS_URL: redis://redis:6379/0
+      AUTH_SERVICE_URL: http://auth-service:3000
+      NOTIFICATION_SERVICE_URL: http://notification-service:3000
+    depends_on:
+      - db
+      - redis
+
+  # --- Manager (Worker) ---
+  sidekiq-worker:
+    build: .
+    command: bundle exec sidekiq
+    volumes:
+      - .:/rails
+    environment:
+      DATABASE_URL: postgres://postgres:password@db:5432/manager_development
+      REDIS_URL: redis://redis:6379/0
+      NOTIFICATION_SERVICE_URL: http://notification-service:3000
+    depends_on:
+      - db
+      - redis
+      - webscraping-manager
+
+volumes:
+  postgres_data:
