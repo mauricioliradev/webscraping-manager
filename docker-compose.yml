@@ -20,9 +20,9 @@ services:
   # --- Auth Service ---
   auth-service:
     build:
-      context: ../auth-service  # <--- Pulo do Gato: Busca na pasta vizinha
+      context: ../auth-service  #   <--- Busca na pasta vizinha
       dockerfile: Dockerfile
-    command: bash -c "rm -f tmp/pids/server.pid && bundle exec rails s -p 3000 -b '0.0.0.0'"
+    command: ./bin/rails server -b 0.0.0.0 -p 3000
     volumes:
       - ../auth-service:/rails  # Volume mapeado para editar código em tempo real
     ports:
@@ -37,7 +37,7 @@ services:
     build:
       context: ../notification-service # <--- Busca na pasta vizinha
       dockerfile: Dockerfile
-    command: bash -c "rm -f tmp/pids/server.pid && bundle exec rails s -p 3000 -b '0.0.0.0'"
+    command: ./bin/rails server -b 0.0.0.0 -p 3000
     volumes:
       - ../notification-service:/rails
     ports:
@@ -50,7 +50,7 @@ services:
   # --- Manager (Web) ---
   webscraping-manager:
     build: .  # <--- Contexto é a própria pasta atual
-    command: bash -c "rm -f tmp/pids/server.pid && bundle exec rails s -p 3000 -b '0.0.0.0'"
+    command: ./bin/rails server -b 0.0.0.0 -p 3000
     volumes:
       - .:/rails
     ports:
