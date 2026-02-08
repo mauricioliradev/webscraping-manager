@@ -1,0 +1,8 @@
+<h1>Bem-vindo ao Webscraping Manager</h1>
+<% if session[:user_email] %>
+  <p>Logado como: <%= session[:user_email] %></p>
+  <%= button_to "Sair", logout_path, method: :delete %>
+<% else %>
+  <p>Você não está logado.</p>
+  <%= link_to "Entrar", login_path %>
+<% end %>
