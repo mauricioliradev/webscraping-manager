@@ -1,0 +1,63 @@
+<div class="sm:flex sm:items-center sm:justify-between mb-8">
+  <div>
+    <h1 class="text-2xl font-bold leading-7 text-gray-900 sm:truncate sm:text-3xl sm:tracking-tight">Tarefas</h1>
+    <p class="mt-1 text-sm text-gray-500">Gerencie suas coletas de dados e histórico de preços.</p>
+  </div>
+  <div class="mt-4 sm:ml-16 sm:mt-0 sm:flex-none">
+    <%= link_to "Nova Coleta", new_task_path, class: "block rounded-md bg-indigo-600 px-3 py-2 text-center text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 transition-all" %>
+  </div>
+</div>
+
+<% if @tasks.any? %>
+  <div class="overflow-hidden bg-white shadow ring-1 ring-black ring-opacity-5 sm:rounded-lg">
+    <table class="min-w-full divide-y divide-gray-300">
+      <thead class="bg-gray-50">
+        <tr>
+          <th scope="col" class="py-3.5 pl-4 pr-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500 sm:pl-6">Veículo</th>
+          <th scope="col" class="px-3 py-3.5 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">Status</th>
+          <th scope="col" class="px-3 py-3.5 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">Criado em</th>
+          <th scope="col" class="relative py-3.5 pl-3 pr-4 sm:pr-6"><span class="sr-only">Ações</span></th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-gray-200 bg-white">
+        <% @tasks.each do |task| %>
+          <tr class="hover:bg-gray-50 transition-colors">
+            <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6">
+              <%= link_to task.title, task_path(task), class: "hover:text-indigo-600" %>
+              <div class="text-gray-500 font-normal text-xs mt-0.5 truncate max-w-xs"><%= task.url %></div>
+            </td>
+            <td class="whitespace-nowrap px-3 py-4 text-sm">
+              <% 
+                badge_class = case task.status
+                  when 'completed' then "bg-green-50 text-green-700 ring-green-600/20"
+                  when 'failed' then "bg-red-50 text-red-700 ring-red-600/20"
+                  when 'processing' then "bg-blue-50 text-blue-700 ring-blue-700/10 animate-pulse"
+                  else "bg-yellow-50 text-yellow-800 ring-yellow-600/20"
+                end
+              %>
+              <span class="inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset <%= badge_class %>">
+                <%= task.status.capitalize %>
+              </span>
+            </td>
+            <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500"><%= task.created_at.strftime("%d/%m/%Y %H:%M") %></td>
+            <td class="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
+              <%= link_to "Ver", task_path(task), class: "text-indigo-600 hover:text-indigo-900 mr-4" %>
+              <%= link_to "Excluir", task_path(task), data: { turbo_method: :delete, confirm: "Tem certeza?" }, class: "text-gray-400 hover:text-red-600 transition-colors" %>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+<% else %>
+  <div class="text-center py-20 bg-white rounded-lg border-2 border-dashed border-gray-300">
+    <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+    </svg>
+    <h3 class="mt-2 text-sm font-semibold text-gray-900">Nenhuma tarefa</h3>
+    <p class="mt-1 text-sm text-gray-500">Comece criando um novo robô de coleta.</p>
+    <div class="mt-6">
+      <%= link_to "Criar primeira tarefa", new_task_path, class: "inline-flex items-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600" %>
+    </div>
+  </div>
+<% end %>

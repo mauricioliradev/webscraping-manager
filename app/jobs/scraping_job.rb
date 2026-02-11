@@ -14,10 +14,21 @@ class ScrapingJob < ApplicationJob
 
     # Salva
     task.update(status: :completed, result: data, error_message: nil)
-    puts "Scraping concluído: #{data}"
+    
+    send_notification(task, 'task_completed', data)
 
   rescue StandardError => e
     task.update(status: :failed, error_message: e.message)
-    puts "Erro no scraping: #{e.message}"    
+    
+    send_notification(task, 'task_failed', { error: e.message })
+  end
+
+  private
+
+  def send_notification(task, event_type, data = {})
+    user_info = { id: task.user_id } 
+
+    client = NotificationClient.new
+    client.notify(task.id, event_type, user_info, data)
   end
 end

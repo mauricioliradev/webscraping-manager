@@ -1,29 +1,49 @@
 <!DOCTYPE html>
-<html>
+<html class="h-full bg-gray-50">
   <head>
-    <title><%= content_for(:title) || "Webscraping Manager" %></title>
+    <title>WebscrapingManager</title>
     <meta name="viewport" content="width=device-width,initial-scale=1">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="application-name" content="Webscraping Manager">
-    <meta name="mobile-web-app-capable" content="yes">
     <%= csrf_meta_tags %>
     <%= csp_meta_tag %>
-
-    <%= yield :head %>
-
-    <%# Enable PWA manifest for installable apps (make sure to enable in config/routes.rb too!) %>
-    <%#= tag.link rel: "manifest", href: pwa_manifest_path(format: :json) %>
-
-    <link rel="icon" href="/icon.png" type="image/png">
-    <link rel="icon" href="/icon.svg" type="image/svg+xml">
-    <link rel="apple-touch-icon" href="/icon.png">
-
-    <%# Includes all stylesheet files in app/assets/stylesheets %>
-    <%= stylesheet_link_tag :app, "data-turbo-track": "reload" %>
+    <%= stylesheet_link_tag "tailwind", "data-turbo-track": "reload" %>
+    <%= stylesheet_link_tag "application.tailwind", "data-turbo-track": "reload" %>
     <%= javascript_importmap_tags %>
   </head>
 
-  <body>
-    <%= yield %>
+  <body class="h-full font-sans text-gray-900 antialiased">
+    <nav class="bg-white border-b border-gray-200 sticky top-0 z-50">
+      <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div class="flex h-16 justify-between items-center">
+          <div class="flex items-center gap-8">
+            <a href="/" class="text-xl font-bold tracking-tight text-indigo-600">
+              WebMotors<span class="text-gray-900">Manager</span>
+            </a>
+            
+            <% if session[:user_id] %>
+              <div class="hidden md:flex gap-6 text-sm font-medium">
+                <%= link_to "Dashboard", root_path, class: "text-gray-500 hover:text-gray-900 transition-colors" %>
+                <%= link_to "Tarefas", tasks_path, class: "text-gray-900" %>
+              </div>
+            <% end %>
+          </div>
+
+          <div class="flex items-center gap-4">
+            <% if session[:user_id] %>
+              <span class="text-sm text-gray-500 hidden sm:block"><%= session[:user_email] %></span>
+              <%= button_to "Sair", logout_path, method: :delete, class: "text-sm font-medium text-red-600 hover:text-red-800 transition-colors" %>
+            <% else %>
+              <%= link_to "Entrar", login_path, class: "text-sm font-semibold text-indigo-600 hover:text-indigo-500" %>
+            <% end %>
+          </div>
+        </div>
+      </div>
+    </nav>
+
+    <main class="py-10">
+      <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <%= render "shared/flash" %>
+        <%= yield %>
+      </div>
+    </main>
   </body>
 </html>

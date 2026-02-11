@@ -28,6 +28,10 @@
 !/tmp/storage/
 !/tmp/storage/.keep
 
+# Ignore Tailwind build artifacts
+/app/assets/builds/*
+!/app/assets/builds/.keep
+
 /public/assets
 
 # Ignore key files for decrypting credentials and more.
