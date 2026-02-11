@@ -4,7 +4,7 @@ Frontend e Orquestrador do sistema. Responsável pela interface com usuário, ge
 
 ## Arquitetura & Responsabilidades
 
-![Arquitetura da Solução](drawio.png)
+![Arquitetura da Solução](drawio.jpg)
 
 * **Frontend:** Interface moderna construída com **Tailwind CSS** e ERB.
 * **Backend:** Ruby on Rails 8.1
