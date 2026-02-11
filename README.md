@@ -1,65 +1,61 @@
-# Webscraping Manager
+# Webscraping Manager (Aplicação Principal)
 
-Aplicação Rails 8 que centraliza tarefas de scraping da Webmotors. O projeto já está preparado para rodar dentro de containers via Docker/Kamal, mas também funciona em modo local tradicional.
+Frontend e Orquestrador do sistema. Responsável pela interface com usuário, gerenciamento de filas de scraping e integração com os microsserviços.
 
-## Requisitos
+## Arquitetura & Responsabilidades
 
-- Ruby 3.3+
-- PostgreSQL 14+
-- Redis (Sidekiq + Solid Queue)
-- Node não é necessário: o Tailwind roda pelo gem `tailwindcss-rails`
+![Arquitetura da Solução](drawio.png)
 
-## Configuração básica
+* **Frontend:** Interface moderna construída com **Tailwind CSS** e ERB.
+* **Backend:** Ruby on Rails 8.1
+* **Workers:** **Sidekiq + Redis** para processamento assíncrono de tarefas pesadas.
+* **Scraper:** Engine construída com **Nokogiri** e **Faraday**, capaz de contornar bloqueios WAF simples.
 
-1. Instale as dependências Ruby:
+##Requisitos
+* **Ruby:** 3.4.7
+* **Banco:** PostgreSQL.
+* **Cache/Fila:** Redis.
 
-	```sh
-	bundle install
-	```
+## Como Executar
 
-2. Configure as credenciais (`config/credentials.yml.enc`) e crie o banco:
+A aplicação roda na porta **3000**.
 
-	```sh
-	bin/rails db:prepare
-	```
-
-3. Inicie os serviços auxiliares (Redis e Postgres) ou utilize `docker-compose up` na raiz para subir tudo junto.
-
-## Ambientes de desenvolvimento
-
-Use o script `bin/dev` para iniciar o servidor com recarga de estilos Tailwind automática:
-
-```sh
-bin/dev
+```bash
+# Na raiz do projeto webscraping-manager
+sudo docker-compose up --build
 ```
 
-O script executa o `rails server` e `rails tailwindcss:watch` em paralelo. Caso prefira rodar manualmente:
+Ao iniciar, o container executa automaticamente:
+- Criação/Migração do Banco.
+- Build do Tailwind CSS.
+- Inicialização do servidor Puma.
 
-```sh
-bin/rails server
-bin/rails tailwindcss:watch
+Acesse: http://localhost:3000
+
+
+## Funcionalidades (Endpoints de UI)
+
+O sistema utiliza arquitetura MVC clássica, mas integra APIs internamente:
+
+| Rota | Descrição |
+|------|-----------|
+| `GET /` | Dashboard (Requer Login). |
+| `GET /login` | Formulário de Autenticação (Integra com Auth Service). |
+| `GET /tasks` | Listagem de tarefas de scraping. |
+| `POST /tasks` | Cria nova tarefa e dispara Job no Sidekiq. |
+| `GET /tasks/:id` | Visualiza detalhes e JSON coletado. |
+
+## Qualidade de Código e Testes
+
+
+**Rodar Testes (RSpec):**
+```bash
+sudo docker-compose exec webscraping-manager bundle exec rspec
 ```
 
-Para gerar os estilos antes de um deploy (ex.: em CI), utilize:
-
-```sh
-RAILS_ENV=production bin/rails assets:precompile
+**Verificar Linter (Rubocop):**
+```bash
+sudo docker-compose exec webscraping-manager bundle exec rubocop
 ```
 
-## Jobs e scraping
 
-- `ScrapingJob` dispara o serviço `WebmotorsScraper`
-- Sidekiq é o adaptador configurado em `config/application.rb`
-- Use `bin/rails jobs:work` ou um processo Sidekiq separado para processar as filas
-
-## Testes
-
-Assim que for adicionado um conjunto de specs, rode:
-
-```sh
-bin/rails test
-```
-
-## Deploy
-
-Kamal está configurado na pasta `.kamal/`. Consulte a documentação oficial para gerar os secrets e rodar `bin/kamal deploy`.
