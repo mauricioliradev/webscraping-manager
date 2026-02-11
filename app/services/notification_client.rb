@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class NotificationClient
   BASE_URL = ENV['NOTIFICATION_SERVICE_URL'] || 'http://notification-service:3000'
 
@@ -15,14 +17,14 @@ class NotificationClient
         task_id: task_id,
         event_type: event_type,
         data: {
-          user: user_data,     
+          user: user_data,
           result: collected_data
         }
       }
     }
 
     response = @conn.post('/notifications', payload)
-    
+
     if response.success?
       Rails.logger.info "Notificação enviada: #{event_type} (Task #{task_id})"
     else

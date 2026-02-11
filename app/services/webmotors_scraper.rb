@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'nokogiri'
 require 'faraday'
 require 'json'
@@ -13,31 +15,31 @@ class WebmotorsScraper
     'Sec-Fetch-Dest' => 'document',
     'Sec-Fetch-Mode' => 'navigate',
     'Sec-Fetch-Site' => 'cross-site'
-  }
+  }.freeze
 
   def initialize(url)
     @url = url
   end
 
   def scrape
-    puts "Acessando URL: #{@url}..."
-    
+    Rails.logger.debug { "Acessando URL: #{@url}..." }
+
     response = Faraday.get(@url, nil, HEADERS)
 
     if response.status == 200
       html = response.body
       doc = Nokogiri::HTML(html)
-      
+
       extract_data(doc)
     elsif response.status == 403
       # Fallback se a Webmotors bloquear mesmo com headers, retonar dados "mockados" baseados na URL para não travar o teste.
-      puts "Bloqueio WAF (403) detectado. Usando estratégia de fallback."
+      Rails.logger.debug 'Bloqueio WAF (403) detectado. Usando estratégia de fallback.'
       mock_data_from_url
     else
       raise "Erro HTTP: #{response.status}"
     end
   rescue StandardError => e
-    puts "Erro no scraper: #{e.message}"
+    Rails.logger.debug { "Erro no scraper: #{e.message}" }
     raise e
   end
 
@@ -45,14 +47,14 @@ class WebmotorsScraper
 
   def extract_data(doc)
     json_ld = doc.at_css('script[type="application/ld+json"]')
-    
+
     if json_ld
       begin
         data = JSON.parse(json_ld.text)
         vehicle = data.is_a?(Array) ? data.first : data
-        
+
         price = vehicle.dig('offers', 'price') || vehicle['price']
-        
+
         return {
           brand: vehicle['brand'] || extract_meta(doc, 'og:brand'),
           model: vehicle['model'] || extract_meta(doc, 'og:model'),
@@ -64,10 +66,10 @@ class WebmotorsScraper
       end
     end
 
-    #MetaTags
+    # MetaTags
     {
-      brand: extract_meta(doc, 'og:site_name') || "Marca Desconhecida",
-      model: doc.title.split(' ').first(3).join(' '),
+      brand: extract_meta(doc, 'og:site_name') || 'Marca Desconhecida',
+      model: doc.title.split.first(3).join(' '),
       price: extract_price_visual(doc),
       description: extract_meta(doc, 'og:description')
     }
@@ -80,20 +82,19 @@ class WebmotorsScraper
 
   def extract_price_visual(doc)
     element = doc.css('strong#vehicleInfoPrice').first || doc.css('.price-container strong').first
-    element ? element.text.strip : "Preço sob consulta"
+    element ? element.text.strip : 'Preço sob consulta'
   end
-
 
   def mock_data_from_url
     parts = @url.split('/')
-    brand = parts[4]&.capitalize || "Marca"
-    model = parts[5]&.capitalize || "Modelo"
-    
+    brand = parts[4]&.capitalize || 'Marca'
+    model = parts[5]&.capitalize || 'Modelo'
+
     {
       brand: brand,
       model: model,
-      price: "R$ 229.900 (Estimado - Bloqueio WAF)",
-      description: "Dados recuperados via URL devido a bloqueio de segurança do site alvo."
+      price: 'R$ 229.900 (Estimado - Bloqueio WAF)',
+      description: 'Dados recuperados via URL devido a bloqueio de segurança do site alvo.'
     }
   end
 end

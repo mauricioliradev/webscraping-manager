@@ -1,13 +1,15 @@
+# frozen_string_literal: true
+
 Rails.application.routes.draw do
-  get "dashboard/index"
+  get 'dashboard/index'
   # Rotas de Autenticação
   get '/login', to: 'sessions#new'
   post '/login', to: 'sessions#create'
   delete '/logout', to: 'sessions#destroy'
 
-  resources :tasks, only: [:index, :new, :create, :show, :destroy]
+  resources :tasks, only: %i[index new create show destroy]
   # Dashboard
   root 'dashboard#index'
-  
+
   get '/up', to: 'rails/health#show', as: :rails_health_check
 end

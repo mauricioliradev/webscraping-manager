@@ -1,7 +1,8 @@
+# frozen_string_literal: true
+
 class SessionsController < ApplicationController
   # GET /login
-  def new
-  end
+  def new; end
 
   # POST /login
   def create
@@ -17,7 +18,7 @@ class SessionsController < ApplicationController
       redirect_to root_path, notice: 'Login realizado com sucesso!'
     else
       flash.now[:alert] = result[:error]
-      render :new, status: :unprocessable_entity
+      render :new, status: :unprocessable_content
     end
   end
 
