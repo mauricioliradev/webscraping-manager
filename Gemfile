@@ -64,7 +64,7 @@ end
 group :development do
   # Use console on exceptions pages [https://github.com/rails/web-console]
   gem 'factory_bot_rails'
-  gem 'rspec-rails', '~> 6.1.0'
+  gem 'rspec-rails', '~> 8.0.2'
   gem 'rubocop-performance', require: false
   gem 'rubocop-rails', require: false
   gem 'shoulda-matchers'
